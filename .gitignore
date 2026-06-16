@@ -3,3 +3,5 @@ uploads/
 ds
 __pycache__/
 *.pyc
+.env
+.env.local

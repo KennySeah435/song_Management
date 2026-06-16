@@ -743,6 +743,28 @@
       .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
+  function displayName(value) {
+    if (!value) return '';
+    const raw = String(value);
+    if (raw.startsWith('http://') || raw.startsWith('https://')) {
+      try {
+        const u = new URL(raw);
+        const parts = u.pathname.split('/').filter(Boolean);
+        return decodeURIComponent(parts[parts.length - 1] || raw);
+      } catch (err) {
+        return raw;
+      }
+    }
+    return raw.split(/[\\/]/).pop();
+  }
+
+  function attachmentUrl(value) {
+    if (!value) return '';
+    const raw = String(value);
+    if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
+    return `/uploads/${encodeURIComponent(raw)}`;
+  }
+
   function toast(msg, type='ok') {
     const el = document.getElementById('toast');
     el.textContent = msg;
@@ -814,13 +836,13 @@
       const chips = [];
 
       if (s.chord_sheet)
-        chips.push(`<a class="chip chip-sheet" href="/uploads/${encodeURIComponent(s.chord_sheet)}" target="_blank">${ICON.file} Chord</a>`);
+        chips.push(`<a class="chip chip-sheet" href="${esc(attachmentUrl(s.chord_sheet))}" target="_blank">${ICON.file} Chord</a>`);
       if (s.lead_sheet)
-        chips.push(`<a class="chip chip-sheet" href="/uploads/${encodeURIComponent(s.lead_sheet)}" target="_blank">${ICON.file} Lead</a>`);
+        chips.push(`<a class="chip chip-sheet" href="${esc(attachmentUrl(s.lead_sheet))}" target="_blank">${ICON.file} Lead</a>`);
       if (s.jianpu)
-        chips.push(`<a class="chip chip-sheet" href="/uploads/${encodeURIComponent(s.jianpu)}" target="_blank">${ICON.file} 简谱</a>`);
+        chips.push(`<a class="chip chip-sheet" href="${esc(attachmentUrl(s.jianpu))}" target="_blank">${ICON.file} 简谱</a>`);
       if (s.audio)
-        chips.push(`<a class="chip chip-audio" href="/uploads/${encodeURIComponent(s.audio)}" target="_blank">${ICON.music} Audio</a>`);
+        chips.push(`<a class="chip chip-audio" href="${esc(attachmentUrl(s.audio))}" target="_blank">${ICON.music} Audio</a>`);
       if (s.youtube_url)
         chips.push(`<a class="chip chip-yt" href="${esc(s.youtube_url)}" target="_blank" rel="noopener">${ICON.yt} YouTube</a>`);
 
@@ -855,7 +877,7 @@
     if (existingName && !toClear.has(field)) {
       const existing = document.createElement('div');
       existing.className = 'file-existing';
-      existing.innerHTML = `${ICON.file}<span class="fname">${esc(existingName)}</span>`;
+      existing.innerHTML = `${ICON.file}<span class="fname">${esc(displayName(existingName))}</span>`;
       const clrBtn = document.createElement('button');
       clrBtn.type = 'button';
       clrBtn.className = 'btn-clr';
