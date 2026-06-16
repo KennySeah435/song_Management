@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Song List</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:           #f5f3ef;
+      --surface:      #ffffff;
+      --surface-2:    #f0ede8;
+      --border:       #e2dcd4;
+      --panel:        #faf8f5;
+      --panel-strong: #1e1b16;
+      --panel-text:   #ffffff;
+      --accent:       #d4601f;
+      --accent-light: #fff3ec;
+      --accent-mid:   rgba(212,96,31,.18);
+      --text:         #1c1814;
+      --muted:        #7a6f65;
+      --green:        #0d7a5f;
+      --green-dim:    #edfaf5;
+      --purple:       #6033c0;
+      --purple-dim:   #f3effd;
+      --danger:       #c0261a;
+      --danger-dim:   #fef2f1;
+      --yt:           #cc1b1b;
+      --yt-dim:       #fff0f0;
+      --toast-bg:     #1e1b16;
+      --toggle-bg:    #f0ede8;
+      --toggle-fg:    #1c1814;
+      --toggle-border:#e2dcd4;
+      --toggle-shadow:0 2px 8px rgba(0,0,0,.08);
+      --shadow:       0 1px 3px rgba(0,0,0,.07), 0 4px 12px rgba(0,0,0,.05);
+    }
+
+    html[data-theme="dark"] {
+      --bg:           #12110f;
+      --surface:      #1a1815;
+      --surface-2:    #23201c;
+      --border:       #37322b;
+      --panel:        #1f1c18;
+      --panel-strong: #f4efe7;
+      --panel-text:   #12110f;
+      --accent:       #f29a5a;
+      --accent-light: #2b2118;
+      --accent-mid:   rgba(242,154,90,.16);
+      --text:         #f4efe7;
+      --muted:        #b2a79a;
+      --green:        #55c8a4;
+      --green-dim:    #152722;
+      --purple:       #b79cff;
+      --purple-dim:   #201a33;
+      --danger:       #ff7f73;
+      --danger-dim:   #2d1817;
+      --yt:           #ff6d6d;
+      --yt-dim:       #301717;
+      --toast-bg:     #f4efe7;
+      --toggle-bg:    #23201c;
+      --toggle-fg:    #f4efe7;
+      --toggle-border:#37322b;
+      --toggle-shadow:0 2px 10px rgba(0,0,0,.32);
+      --shadow:       0 1px 3px rgba(0,0,0,.25), 0 8px 22px rgba(0,0,0,.18);
+      color-scheme: dark;
+    }
+
+    html { color-scheme: light; }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background-color .2s ease, color .2s ease;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: var(--panel-strong);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      box-shadow: 0 2px 12px rgba(0,0,0,.18);
+    }
+
+    .brand {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.5rem;
+      font-weight: 900;
+      letter-spacing: -.02em;
+      color: var(--panel-text);
+    }
+
+    .brand em { color: var(--accent); font-style: normal; }
+
+    .header-sub {
+      font-size: .73rem;
+      color: var(--muted);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-theme {
+      background: var(--toggle-bg);
+      color: var(--toggle-fg);
+      border: 1px solid var(--toggle-border);
+      border-radius: 999px;
+      padding: 9px 14px;
+      font-family: inherit;
+      font-size: .8rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: var(--toggle-shadow);
+      transition: transform .12s, background-color .2s, color .2s, border-color .2s, box-shadow .2s;
+    }
+    .btn-theme:hover { transform: translateY(-1px); }
+    .btn-theme:active { transform: translateY(0); }
+
+    /* ── Layout ── */
+    .main { padding: 28px 32px; max-width: 1440px; margin: 0 auto; }
+
+    /* ── Toolbar ── */
+    .toolbar { display: flex; gap: 12px; align-items: center; margin-bottom: 18px; }
+
+    .search-wrap { flex: 1; position: relative; }
+
+    .search-wrap svg {
+      position: absolute; left: 13px; top: 50%;
+      transform: translateY(-50%); color: var(--muted); pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px 10px 40px;
+      font-family: inherit;
+      font-size: .88rem;
+      color: var(--text);
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      box-shadow: var(--shadow);
+    }
+    .search-input::placeholder { color: var(--muted); }
+    .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(212,96,31,.12); }
+
+    .btn-add {
+      background: var(--accent);
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 22px;
+      font-family: inherit;
+      font-size: .88rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(212,96,31,.35);
+      transition: background .15s, transform .1s, box-shadow .15s;
+    }
+    .btn-add:hover { background: #bf5419; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(212,96,31,.4); }
+    .btn-add:active { transform: scale(.97); }
+
+    /* ── Table ── */
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    thead th {
+      background: var(--panel);
+      padding: 11px 16px;
+      text-align: left;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-bottom: 1.5px solid var(--border);
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background .12s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #fdf9f6; }
+    html[data-theme="dark"] tbody tr:hover { background: #201c18; }
+
+    td { padding: 13px 16px; font-size: .875rem; vertical-align: middle; }
+
+    .num-cell { color: #c8bfb5; font-size: .75rem; width: 40px; font-weight: 600; }
+
+    .title-en { font-weight: 600; line-height: 1.3; color: var(--text); }
+    .title-zh { font-size: .8rem; color: var(--muted); margin-top: 2px; }
+
+    .key-badge {
+      display: inline-block;
+      background: var(--accent-light);
+      color: var(--accent);
+      border: 1.5px solid rgba(212,96,31,.22);
+      border-radius: 7px;
+      padding: 4px 11px;
+      font-size: .82rem;
+      font-weight: 800;
+      font-family: 'Playfair Display', serif;
+      letter-spacing: .02em;
+    }
+
+    .beats-badge {
+      display: inline-block;
+      background: var(--surface-2);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px 9px;
+      font-size: .78rem;
+      font-weight: 600;
+    }
+
+    /* ── Attachment chips ── */
+    .chips { display: flex; flex-wrap: wrap; gap: 5px; }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border-radius: 6px;
+      padding: 4px 9px;
+      font-size: .71rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-decoration: none;
+      transition: filter .15s, transform .1s;
+      cursor: pointer;
+    }
+    .chip:hover { filter: brightness(.93); transform: translateY(-1px); }
+
+    .chip-sheet { background: var(--green-dim);  color: var(--green);  border: 1px solid rgba(13,122,95,.18); }
+    .chip-audio { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(96,51,192,.18); }
+    .chip-yt    { background: var(--yt-dim);     color: var(--yt);     border: 1px solid rgba(204,27,27,.18); }
+
+    .remark-cell {
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--muted);
+      font-size: .8rem;
+      font-style: italic;
+    }
+
+    /* ── Row actions ── */
+    .row-actions { display: flex; gap: 6px; }
+
+    .btn-row {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 5px 11px;
+      font-family: inherit;
+      font-size: .75rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+    .btn-row:hover     { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+    .btn-row.del:hover { border-color: var(--danger); color: var(--danger); background: var(--danger-dim); }
+
+    /* ── Empty / count ── */
+    .empty-state { text-align: center; padding: 72px 20px; }
+    .empty-note  { font-size: 2.6rem; margin-bottom: 14px; opacity: .25; }
+    .empty-state p { color: var(--muted); font-size: .9rem; }
+
+    .tbl-footer {
+      padding: 9px 16px;
+      font-size: .78rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      background: var(--panel);
+      font-weight: 500;
+    }
+
+    /* ── Modal ── */
+    .backdrop {
+      position: fixed; inset: 0;
+      background: rgba(28,24,20,.55);
+      backdrop-filter: blur(6px);
+      z-index: 100;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+      opacity: 0; pointer-events: none;
+      transition: opacity .22s;
+    }
+    .backdrop.open { opacity: 1; pointer-events: all; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      width: 100%;
+      max-width: 700px;
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0,0,0,.2);
+      transform: scale(.95) translateY(14px);
+      transition: transform .22s;
+    }
+    .backdrop.open .modal { transform: scale(1) translateY(0); }
+
+    .modal-head {
+      padding: 22px 26px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      background: var(--panel);
+      border-radius: 18px 18px 0 0;
+    }
+
+    .modal-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .btn-x {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted); font-size: 1.15rem; cursor: pointer;
+      transition: all .15s;
+    }
+    .btn-x:hover { color: var(--text); background: var(--border); }
+
+    .modal-body { padding: 22px 26px; overflow-y: auto; flex: 1; }
+
+    .fsec { margin-bottom: 26px; }
+    .fsec:last-child { margin-bottom: 0; }
+
+    .fsec-label {
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      padding-bottom: 10px;
+      border-bottom: 1.5px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .frow { display: grid; gap: 14px; margin-bottom: 14px; }
+    .frow:last-child { margin-bottom: 0; }
+    .frow.c2 { grid-template-columns: 1fr 1fr; }
+
+    .fgrp { display: flex; flex-direction: column; gap: 6px; }
+
+    label.flabel {
+      font-size: .78rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    label.flabel .req { color: var(--danger); }
+
+    input[type=text], input[type=url], select, textarea {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-family: inherit;
+      font-size: .88rem;
+      color: var(--text);
+      width: 100%;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(212,96,31,.1);
+    }
+    input::placeholder, textarea::placeholder { color: #b0a89e; }
+    textarea { resize: vertical; min-height: 78px; }
+    select option { background: #ffffff; color: var(--text); }
+    html[data-theme="dark"] select option { background: #1a1815; color: var(--text); }
+
+    /* File upload */
+    .file-existing {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--green-dim);
+      border: 1px solid rgba(13,122,95,.2);
+      border-radius: 7px;
+      padding: 7px 10px;
+      font-size: .78rem; color: var(--green);
+    }
+    .file-existing .fname { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .btn-clr {
+      background: none; border: none; color: var(--danger);
+      cursor: pointer; font-size: 1.1rem; line-height: 1;
+      padding: 0 2px; transition: opacity .15s;
+    }
+    .btn-clr:hover { opacity: .7; }
+
+    .file-pick {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--surface-2);
+      border: 1.5px dashed var(--border);
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: .8rem; color: var(--muted);
+      cursor: pointer;
+      transition: border-color .2s, color .2s, background .2s;
+    }
+    .file-pick:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+    .file-pick input[type=file] { display: none; }
+
+    /* Modal footer */
+    .modal-foot {
+      padding: 16px 26px;
+      border-top: 1px solid var(--border);
+      display: flex; justify-content: flex-end; gap: 10px;
+      flex-shrink: 0;
+      background: var(--panel);
+      border-radius: 0 0 18px 18px;
+    }
+
+    .btn-cancel {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 9px; padding: 9px 20px;
+      font-family: inherit; font-size: .88rem; font-weight: 600;
+      color: var(--muted); cursor: pointer;
+      transition: all .15s;
+    }
+    .btn-cancel:hover { border-color: var(--muted); color: var(--text); background: var(--surface-2); }
+
+    .btn-save {
+      background: var(--accent);
+      border: none; border-radius: 9px; padding: 9px 24px;
+      font-family: inherit; font-size: .88rem; font-weight: 700;
+      color: #ffffff; cursor: pointer;
+      box-shadow: 0 2px 8px rgba(212,96,31,.3);
+      transition: background .15s, box-shadow .15s;
+    }
+    .btn-save:hover { background: #bf5419; box-shadow: 0 4px 14px rgba(212,96,31,.4); }
+    .btn-save:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+
+    /* ── Confirm dialog ── */
+    .confirm-back {
+      position: fixed; inset: 0;
+      background: rgba(28,24,20,.5);
+      backdrop-filter: blur(5px);
+      z-index: 200;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+      opacity: 0; pointer-events: none;
+      transition: opacity .18s;
+    }
+    .confirm-back.open { opacity: 1; pointer-events: all; }
+
+    .confirm-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px 24px;
+      max-width: 370px; width: 100%;
+      text-align: center;
+      box-shadow: 0 16px 48px rgba(0,0,0,.15);
+      transform: scale(.94);
+      transition: transform .18s;
+    }
+    .confirm-back.open .confirm-box { transform: scale(1); }
+
+    .confirm-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem; font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .confirm-msg { color: var(--muted); font-size: .85rem; margin-bottom: 22px; }
+
+    .confirm-acts { display: flex; gap: 10px; justify-content: center; }
+
+    .btn-danger {
+      background: var(--danger); color: white;
+      border: none; border-radius: 8px; padding: 9px 22px;
+      font-family: inherit; font-size: .88rem; font-weight: 700;
+      cursor: pointer; transition: opacity .15s;
+    }
+    .btn-danger:hover { opacity: .85; }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--toast-bg);
+      border-radius: 10px;
+      padding: 11px 16px;
+      font-size: .85rem; font-weight: 600;
+      color: var(--panel-text);
+      z-index: 999;
+      box-shadow: 0 4px 20px rgba(0,0,0,.2);
+      transform: translateY(60px); opacity: 0;
+      transition: transform .28s, opacity .28s;
+      pointer-events: none;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.ok::before  { content: '✓'; color: #34d399; font-weight: 800; }
+    .toast.err::before { content: '✕'; color: #fb7185; font-weight: 800; }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="brand">Song<em>List</em></div>
+  <div class="header-actions">
+    <div class="header-sub">Song Management</div>
+    <button class="btn-theme" id="btnTheme" type="button" aria-label="Toggle color theme"></button>
+  </div>
+</header>
+
+<main class="main">
+  <div class="toolbar">
+    <div class="search-wrap">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input class="search-input" id="searchInput" type="text" placeholder="Search by title, key, remark…">
+    </div>
+    <button class="btn-add" id="btnAdd">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Add Song
+    </button>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Title</th>
+          <th>Key</th>
+          <th>Beats</th>
+          <th>Attachments</th>
+          <th>Remark</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="songBody"></tbody>
+    </table>
+    <div class="tbl-footer" id="tblFooter"></div>
+  </div>
+</main>
+
+<!-- ── Add / Edit Modal ── -->
+<div class="backdrop" id="backdrop">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <div class="modal-title" id="modalTitle">Add Song</div>
+      <button class="btn-x" id="btnCloseModal">×</button>
+    </div>
+
+    <div class="modal-body">
+      <input type="hidden" id="fId">
+
+      <!-- Song Info -->
+      <div class="fsec">
+        <div class="fsec-label">Song Info</div>
+        <div class="frow">
+          <div class="fgrp">
+            <label class="flabel" for="fTitle">Title (English) <span class="req">*</span></label>
+            <input type="text" id="fTitle" placeholder="e.g. Amazing Grace">
+          </div>
+        </div>
+        <div class="frow">
+          <div class="fgrp">
+            <label class="flabel" for="fTitleZh">Title (Chinese / 中文歌名)</label>
+            <input type="text" id="fTitleZh" placeholder="e.g. 奇异恩典">
+          </div>
+        </div>
+        <div class="frow c2">
+          <div class="fgrp">
+            <label class="flabel" for="fKey">Key</label>
+            <select id="fKey">
+              <option value="">— Select key —</option>
+              <optgroup label="Major">
+                <option>C</option><option>C#</option><option>Db</option>
+                <option>D</option><option>D#</option><option>Eb</option>
+                <option>E</option><option>F</option><option>F#</option>
+                <option>Gb</option><option>G</option><option>G#</option>
+                <option>Ab</option><option>A</option><option>A#</option>
+                <option>Bb</option><option>B</option>
+              </optgroup>
+              <optgroup label="Minor">
+                <option>Cm</option><option>C#m</option><option>Dbm</option>
+                <option>Dm</option><option>D#m</option><option>Ebm</option>
+                <option>Em</option><option>Fm</option><option>F#m</option>
+                <option>Gbm</option><option>Gm</option><option>G#m</option>
+                <option>Abm</option><option>Am</option><option>A#m</option>
+                <option>Bbm</option><option>Bm</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="fgrp">
+            <label class="flabel" for="fBeats">Beats / Time Signature</label>
+            <input type="text" id="fBeats" placeholder="e.g. 4/4, 3/4, 120 BPM">
+          </div>
+        </div>
+      </div>
+
+      <!-- Sheets & Audio -->
+      <div class="fsec">
+        <div class="fsec-label">Sheet Music &amp; Audio</div>
+        <div class="frow c2">
+          <div class="fgrp" id="fg_chord_sheet">
+            <label class="flabel">Chord Sheet</label>
+          </div>
+          <div class="fgrp" id="fg_lead_sheet">
+            <label class="flabel">Lead Sheet</label>
+          </div>
+          <div class="fgrp" id="fg_jianpu">
+            <label class="flabel">Jianpu (简谱)</label>
+          </div>
+          <div class="fgrp" id="fg_audio">
+            <label class="flabel">Audio</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Links & Notes -->
+      <div class="fsec">
+        <div class="fsec-label">Links &amp; Notes</div>
+        <div class="frow">
+          <div class="fgrp">
+            <label class="flabel" for="fYoutube">YouTube Link</label>
+            <input type="url" id="fYoutube" placeholder="https://www.youtube.com/watch?v=…">
+          </div>
+        </div>
+        <div class="frow">
+          <div class="fgrp">
+            <label class="flabel" for="fRemark">Remark</label>
+            <textarea id="fRemark" placeholder="Notes, tempo guidance, arrangement details…"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-foot">
+      <button class="btn-cancel" id="btnCancelModal">Cancel</button>
+      <button class="btn-save" id="btnSave">Save Song</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Delete confirm ── -->
+<div class="confirm-back" id="confirmBack">
+  <div class="confirm-box">
+    <div class="confirm-title">Delete Song?</div>
+    <p class="confirm-msg" id="confirmMsg"></p>
+    <div class="confirm-acts">
+      <button class="btn-cancel" id="btnCancelDel">Cancel</button>
+      <button class="btn-danger" id="btnConfirmDel">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast ── -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── Icons ────────────────────────────────────────────────────────────────
+  const ICON = {
+    file: `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>`,
+    music:`<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`,
+    yt:   `<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-2C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 2A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.95C5.12 20 12 20 12 20s6.88 0 8.59-.47a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58zM9.75 15.02V8.98L15.5 12l-5.75 3.02z"/></svg>`,
+    up:   `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`,
+    edit: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
+    del:  `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`,
+  };
+
+  // ── State ────────────────────────────────────────────────────────────────
+  const FILE_FIELDS = ['chord_sheet', 'lead_sheet', 'jianpu', 'audio'];
+  const FILE_META = {
+    chord_sheet: { label: 'Chord Sheet', accept: '.pdf,.png,.jpg,.jpeg' },
+    lead_sheet:  { label: 'Lead Sheet',  accept: '.pdf,.png,.jpg,.jpeg' },
+    jianpu:      { label: 'Jianpu (简谱)', accept: '.pdf,.png,.jpg,.jpeg' },
+    audio:       { label: 'Audio',       accept: '.mp3,.wav,.m4a,.ogg,.aac,.flac' },
+  };
+
+  let songs = [];
+  let editingId = null;
+  const toClear = new Set();
+  let pendingDelId = null;
+  const THEME_STORAGE_KEY = 'songlist-theme';
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function esc(s) {
+    if (!s) return '';
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function toast(msg, type='ok') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = `toast ${type} show`;
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('show'), 3000);
+  }
+
+  function getPreferredTheme() {
+    try {
+      const saved = localStorage.getItem(THEME_STORAGE_KEY);
+      if (saved === 'light' || saved === 'dark') return saved;
+    } catch (err) {}
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+
+  function applyTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, theme);
+    } catch (err) {}
+    const btn = document.getElementById('btnTheme');
+    if (!btn) return;
+    const isDark = theme === 'dark';
+    btn.textContent = isDark ? 'Light mode' : 'Dark mode';
+    btn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+  }
+
+  // ── Data ──────────────────────────────────────────────────────────────────
+  async function loadSongs() {
+    const res = await fetch('/songs');
+    songs = await res.json();
+    applySearch();
+  }
+
+  function applySearch() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = q
+      ? songs.filter(s =>
+          (s.title||'').toLowerCase().includes(q) ||
+          (s.title_zh||'').toLowerCase().includes(q) ||
+          (s.key||'').toLowerCase().includes(q) ||
+          (s.beats||'').toLowerCase().includes(q) ||
+          (s.remark||'').toLowerCase().includes(q)
+        )
+      : songs;
+    renderTable(filtered);
+  }
+
+  // ── Render ────────────────────────────────────────────────────────────────
+  function renderTable(list) {
+    const tbody = document.getElementById('songBody');
+    const footer = document.getElementById('tblFooter');
+
+    if (!list.length) {
+      tbody.innerHTML = `<tr><td colspan="7">
+        <div class="empty-state">
+          <div class="empty-note">♪</div>
+          <p>${songs.length ? 'No songs match your search.' : 'No songs yet — click <strong>Add Song</strong> to get started.'}</p>
+        </div>
+      </td></tr>`;
+      footer.textContent = '';
+      return;
+    }
+
+    footer.textContent = `${list.length} song${list.length !== 1 ? 's' : ''}`;
+
+    tbody.innerHTML = list.map((s, i) => {
+      const chips = [];
+
+      if (s.chord_sheet)
+        chips.push(`<a class="chip chip-sheet" href="/uploads/${encodeURIComponent(s.chord_sheet)}" target="_blank">${ICON.file} Chord</a>`);
+      if (s.lead_sheet)
+        chips.push(`<a class="chip chip-sheet" href="/uploads/${encodeURIComponent(s.lead_sheet)}" target="_blank">${ICON.file} Lead</a>`);
+      if (s.jianpu)
+        chips.push(`<a class="chip chip-sheet" href="/uploads/${encodeURIComponent(s.jianpu)}" target="_blank">${ICON.file} 简谱</a>`);
+      if (s.audio)
+        chips.push(`<a class="chip chip-audio" href="/uploads/${encodeURIComponent(s.audio)}" target="_blank">${ICON.music} Audio</a>`);
+      if (s.youtube_url)
+        chips.push(`<a class="chip chip-yt" href="${esc(s.youtube_url)}" target="_blank" rel="noopener">${ICON.yt} YouTube</a>`);
+
+      return `<tr>
+        <td class="num-cell">${i + 1}</td>
+        <td>
+          <div class="title-en">${esc(s.title)}</div>
+          ${s.title_zh ? `<div class="title-zh">${esc(s.title_zh)}</div>` : ''}
+        </td>
+        <td>${s.key ? `<span class="key-badge">${esc(s.key)}</span>` : `<span style="color:var(--border)">—</span>`}</td>
+        <td>${s.beats ? `<span class="beats-badge">${esc(s.beats)}</span>` : `<span style="color:var(--border)">—</span>`}</td>
+        <td><div class="chips">${chips.length ? chips.join('') : `<span style="color:var(--border);font-size:.75rem">None</span>`}</div></td>
+        <td><div class="remark-cell" title="${esc(s.remark)}">${esc(s.remark) || `<span style="color:var(--border)">—</span>`}</div></td>
+        <td>
+          <div class="row-actions">
+            <button class="btn-row" data-action="edit" data-id="${s.id}">${ICON.edit} Edit</button>
+            <button class="btn-row del" data-action="del" data-id="${s.id}" data-title="${esc(s.title)}">${ICON.del} Delete</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ── File widget ───────────────────────────────────────────────────────────
+  function buildFileWidget(field, existingName) {
+    const container = document.getElementById(`fg_${field}`);
+    const meta = FILE_META[field];
+
+    // Remove old dynamic children (keep the label)
+    Array.from(container.children).slice(1).forEach(c => c.remove());
+
+    if (existingName && !toClear.has(field)) {
+      const existing = document.createElement('div');
+      existing.className = 'file-existing';
+      existing.innerHTML = `${ICON.file}<span class="fname">${esc(existingName)}</span>`;
+      const clrBtn = document.createElement('button');
+      clrBtn.type = 'button';
+      clrBtn.className = 'btn-clr';
+      clrBtn.title = 'Remove file';
+      clrBtn.textContent = '×';
+      clrBtn.onclick = () => { toClear.add(field); buildFileWidget(field, null); };
+      existing.appendChild(clrBtn);
+      container.appendChild(existing);
+    }
+
+    const lbl = document.createElement('label');
+    lbl.className = 'file-pick';
+    lbl.innerHTML = `${ICON.up} ${existingName && !toClear.has(field) ? 'Replace file' : 'Upload file'}`;
+    const inp = document.createElement('input');
+    inp.type = 'file';
+    inp.id = `fi_${field}`;
+    inp.name = field;
+    inp.accept = meta.accept;
+    inp.onchange = () => {
+      if (inp.files.length) {
+        toClear.delete(field);
+        lbl.innerHTML = `${ICON.up} ${inp.files[0].name}`;
+      }
+    };
+    lbl.appendChild(inp);
+    container.appendChild(lbl);
+  }
+
+  // ── Modal open/close ──────────────────────────────────────────────────────
+  function openModal(song = null) {
+    editingId = song ? song.id : null;
+    toClear.clear();
+
+    document.getElementById('modalTitle').textContent = song ? 'Edit Song' : 'Add Song';
+    document.getElementById('fId').value = song ? song.id : '';
+    document.getElementById('fTitle').value   = song ? (song.title || '') : '';
+    document.getElementById('fTitleZh').value = song ? (song.title_zh || '') : '';
+    document.getElementById('fKey').value     = song ? (song.key || '') : '';
+    document.getElementById('fBeats').value   = song ? (song.beats || '') : '';
+    document.getElementById('fYoutube').value = song ? (song.youtube_url || '') : '';
+    document.getElementById('fRemark').value  = song ? (song.remark || '') : '';
+
+    FILE_FIELDS.forEach(f => buildFileWidget(f, song ? song[f] : null));
+
+    document.getElementById('backdrop').classList.add('open');
+    setTimeout(() => document.getElementById('fTitle').focus(), 240);
+  }
+
+  function closeModal() {
+    document.getElementById('backdrop').classList.remove('open');
+    editingId = null;
+    toClear.clear();
+  }
+
+  // ── Save ──────────────────────────────────────────────────────────────────
+  async function saveSong() {
+    const title = document.getElementById('fTitle').value.trim();
+    if (!title) { document.getElementById('fTitle').focus(); return; }
+
+    const btn = document.getElementById('btnSave');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+
+    const fd = new FormData();
+    fd.append('title',       title);
+    fd.append('title_zh',    document.getElementById('fTitleZh').value.trim());
+    fd.append('key',         document.getElementById('fKey').value);
+    fd.append('beats',       document.getElementById('fBeats').value.trim());
+    fd.append('youtube_url', document.getElementById('fYoutube').value.trim());
+    fd.append('remark',      document.getElementById('fRemark').value.trim());
+
+    FILE_FIELDS.forEach(f => {
+      const inp = document.getElementById(`fi_${f}`);
+      if (inp && inp.files.length) fd.append(f, inp.files[0]);
+      if (toClear.has(f)) fd.append(`clear_${f}`, '1');
+    });
+
+    try {
+      const url    = editingId ? `/songs/${editingId}` : '/songs';
+      const method = editingId ? 'PUT' : 'POST';
+      const res    = await fetch(url, { method, body: fd });
+      if (!res.ok) throw new Error((await res.json()).error || 'Server error');
+      closeModal();
+      await loadSongs();
+      toast(editingId ? 'Song updated.' : 'Song added.');
+    } catch (e) {
+      toast(e.message, 'err');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save Song';
+    }
+  }
+
+  // ── Delete ────────────────────────────────────────────────────────────────
+  function openConfirm(id, title) {
+    pendingDelId = id;
+    document.getElementById('confirmMsg').textContent =
+      `"${title}" and all its attached files will be permanently removed.`;
+    document.getElementById('confirmBack').classList.add('open');
+  }
+
+  function closeConfirm() {
+    document.getElementById('confirmBack').classList.remove('open');
+    pendingDelId = null;
+  }
+
+  // ── Event wiring ──────────────────────────────────────────────────────────
+  document.getElementById('btnAdd').onclick = () => openModal();
+  document.getElementById('btnCloseModal').onclick  = closeModal;
+  document.getElementById('btnCancelModal').onclick = closeModal;
+  document.getElementById('btnCancelDel').onclick   = closeConfirm;
+  document.getElementById('btnSave').onclick        = saveSong;
+
+  document.getElementById('btnConfirmDel').onclick = async () => {
+    if (!pendingDelId) return;
+    closeConfirm();
+    await fetch(`/songs/${pendingDelId}`, { method: 'DELETE' });
+    await loadSongs();
+    toast('Song deleted.');
+  };
+
+  // Close on backdrop click
+  document.getElementById('backdrop').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeModal();
+  });
+  document.getElementById('confirmBack').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeConfirm();
+  });
+
+  // Table delegate
+  document.getElementById('songBody').addEventListener('click', e => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const id = parseInt(btn.dataset.id);
+    if (btn.dataset.action === 'edit') {
+      openModal(songs.find(s => s.id === id));
+    } else if (btn.dataset.action === 'del') {
+      openConfirm(id, btn.dataset.title);
+    }
+  });
+
+  // Search
+  document.getElementById('searchInput').addEventListener('input', applySearch);
+  document.getElementById('btnTheme').addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+  });
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  applyTheme(getPreferredTheme());
+  loadSongs();
+</script>
+</body>
+</html>
